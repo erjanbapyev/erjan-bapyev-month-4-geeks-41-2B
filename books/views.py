@@ -1,42 +1,113 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 from datetime import datetime
 import random
-from django.shortcuts import render, get_object_or_404
-from .models import Book
 
-def book_list_view(request):
-    books = Book.objects.all()
-    return render(request, 'books/book_list.html', {'books': books})
+def personal_info(request):
+    name = "Эржан"
+    surname = "Бапыев"
+    age = 17
+    return HttpResponse(f"Имя: {name}, Фамилия: {surname}, Возраст: {age}")
 
-def book_detail_view(request, id):
-    book = get_object_or_404(Book, id=id)
-    return render(request, 'books/book_detail.html', {'book': book})
+def hobbies(request):
+    hobbies_list = "Увлечения: Рсиования, Программирование, Спорт"
+    return HttpResponse(hobbies_list)
+
+def current_time(request):
+    now = datetime.now().strftime("%H:%M:%S")
+    return HttpResponse(f"Текущее время: {now}")
+
+def random_numbers(request):
+    numbers = [random.randint(1, 100) for _ in range(5)]
+    return HttpResponse(f"Случайные числа: {', '.join(map(str, numbers))}")
 
 
+def Book_Detail_view(request, id):
+    if request.method == "GET":
+        bk_id = get_object_or_404(models.Books_list, id=id)
+        return render(
+            request,
+            template_name="books/Book_Detail.html",
+            context={
+                "bk_id": bk_id
+            }
+        )
 
 
-
-def books_info_view(request):
+def Book_List_view(request):
     if request.method == 'GET':
-        return HttpResponse('Это приложение Books. Здесь вы найдете информацию о книгах.')
+        queryset = models.Books_list.objects.filter().order_by('-id')
+        return render(
+            request,
+            template_name='books/Book_List.html',
+            context={
+                'bk': queryset
+            }
+        )
 
-def about_author_view(request):
+def books_tags_view(request):
     if request.method == 'GET':
-        return HttpResponse('Меня зовут [Имя Фамилия], и я автор книг в данной библиотеке.')
+        teen_tags = models.Products.objects.filter(tags__name='Подростковый').order_by('-id')
+        return render(
+            request,
+            template_name='products/books_tags.html',
+            context={'teen_tags': teen_tags}
+        )
 
-def hobbies_view(request):
+
+# all products
+
+def all_books(request):
     if request.method == 'GET':
-        return HttpResponse('Мои хобби: [Список ваших хобби].')
+        products = models.Products.objects.filter().order_by('-id')
+        return render(
+            request,
+            template_name='products/all_books.html',
+            context={
+                'products': products
+            }
+        )
 
-def current_time_view(request):
-    if request.method == 'GET':
-        now = datetime.now()
-        return HttpResponse(f'Текущее время: {now}')
+def edit_books_view(request, id):
+    bk_id = get_object_or_404(models.Employees, id=id)
+    if request.method == 'POST':
+        form = forms.EmployeeForm(request.POST, instance=bk_id)
+        form.save()
+        return HttpResponse('<h3>Books updated successfully!</h3>'
+                            '<a href="/Books_list/">Список книг</a>')
+    else:
+        form = forms.Books_list_Form(instance=bk_id)
+    return render(
+        request,
+        template_name='books/edit_books.html',
+        context={
+            'form': form,
+            'bk_id': bk_id
+        }
+    )
 
-def random_numbers_view(request):
-    if request.method == 'GET':
-        random_num = random.randint(1, 100)
-        return HttpResponse(f'Случайное число: {random_num}')
+
+# delete employee
+def drop_books_view(request, id):
+    bk_id = get_object_or_404(models.Books_list, id=id)
+    bk_id.delete()
+    return HttpResponse('<h3>Book delete successfully!</h3>'
+                        '<a href="/Books_list/">Список книг</a>')
 
 
+# create employee
+
+def create_books_view(request):
+    if request.method == "POST":
+        form = forms.Books_list_Form(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return HttpResponse('<h3>Book created successfully!</h3>'
+                                '<a href="/Books_list/">Список книг</a>')
+    else:
+        form = forms.Books_list_Form()
+
+    return render(
+        request,
+        template_name='books/create_books.html',
+        context={'form': form}
+    )

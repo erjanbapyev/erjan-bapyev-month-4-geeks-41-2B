@@ -1,9 +1,16 @@
-<h1>Список сотрудников</h1>
-{% for i in books %}
-    <br>
-    <img src="{{ i.image.url }}" width="350" height="250">
-    <h2>Имя - {{ i.name }}</h2>
-    <p>Должность - {{ i.programming_status }}</p>
-    <a href="{% url 'book_detail' i.id %}">Подробнее</a>
-    <br>
+<h1>Список произведений</h1>
+{% for i in bk %}
+<div class="card" style="width: 18rem;">
+  <img src="{{ i.image.url }}" class="card-img-top" alt="...">
+  <div class="card-body">
+    <h5 class="card-title">{{ i.name }}</h5>
+    <p class="card-text">{{ i.programming_status }}</p>
+    <a href="/books/{{ i.id}}/" class="btn btn-primary">Подробнее</a>
+  </div>
+</div>
+<br>
 {% endfor %}
+
+
+
+{% include '../footer.html' %}
